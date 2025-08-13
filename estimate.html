@@ -188,15 +188,15 @@
             <h3>Расчёт отмостки</h3>
             <div class="form-group">
                 <label for="pavementLength">Длина отмостки (м)</label>
-                <input type="number" id="pavementLength" min="0" step="0.01" placeholder="Например, 30" required />
+                <input type="number" id="pavementLength" min="0" step="0.01" placeholder="Например, 30 м" required />
             </div>
             <div class="form-group">
                 <label for="pavementWidth">Ширина отмостки (м)</label>
-                <input type="number" id="pavementWidth" min="0" step="0.01" placeholder="Например, 1.0" required />
+                <input type="number" id="pavementWidth" min="0" step="0.01" placeholder="Например, 1 м" required />
             </div>
             <div class="form-group">
                 <label for="pavementThickness">Толщина бетона (см)</label>
-                <input type="number" id="pavementThickness" min="0" step="0.1" placeholder="Например, 10" required />
+                <input type="number" id="pavementThickness" min="0" step="0.1" placeholder="Например, 10 см" required />
             </div>
             <div class="form-group">
                 <label for="pavementMaterialCost">Стоимость бетона (руб/куб.м)</label>
@@ -205,6 +205,11 @@
             <div class="form-group">
                 <label for="pavementLaborCost">Стоимость работ (руб/кв.м)</label>
                 <input type="number" id="pavementLaborCost" min="0" step="0.01" placeholder="руб/кв.м" value="500" required />
+            </div>
+            <!-- Поле для указания маржи -->
+            <div class="form-group">
+                <label for="pavementMargin">Маржа (%)</label>
+                <input type="number" id="pavementMargin" min="0" step="0.1" placeholder="Например, 10" />
             </div>
             <h4>Дополнительные работы и материалы</h4>
             <p>При необходимости укажите дополнительные статьи сметы. Можно добавить несколько позиций.</p>
@@ -221,15 +226,15 @@
             <h3>Расчёт снегозадержателей</h3>
             <div class="form-group">
                 <label for="snowLength">Длина ската (м)</label>
-                <input type="number" id="snowLength" min="0" step="0.01" placeholder="Например, 10" required />
+                <input type="number" id="snowLength" min="0" step="0.01" placeholder="Например, 10 м" required />
             </div>
             <div class="form-group">
                 <label for="snowAngle">Угол наклона крыши (°)</label>
-                <input type="number" id="snowAngle" min="0" step="0.1" placeholder="Например, 30" required />
+                <input type="number" id="snowAngle" min="0" step="0.1" placeholder="Например, 30°" required />
             </div>
             <div class="form-group">
                 <label for="snowSectionLength">Длина одной секции (м)</label>
-                <input type="number" id="snowSectionLength" min="0.1" step="0.1" placeholder="Например, 3" value="3" required />
+                <input type="number" id="snowSectionLength" min="0.1" step="0.1" placeholder="Например, 3 м" value="3" required />
             </div>
             <div class="form-group">
                 <label for="snowSectionCost">Стоимость секции (руб/шт)</label>
@@ -238,6 +243,11 @@
             <div class="form-group">
                 <label for="snowInstallCost">Стоимость монтажа секции (руб/шт)</label>
                 <input type="number" id="snowInstallCost" min="0" step="0.01" placeholder="руб/шт" value="200" required />
+            </div>
+            <!-- Поле для указания маржи -->
+            <div class="form-group">
+                <label for="snowMargin">Маржа (%)</label>
+                <input type="number" id="snowMargin" min="0" step="0.1" placeholder="Например, 10" />
             </div>
             <h4>Дополнительные работы и материалы</h4>
             <p>При необходимости укажите дополнительные статьи сметы.</p>
@@ -254,11 +264,11 @@
             <h3>Расчёт водосточной системы</h3>
             <div class="form-group">
                 <label for="drainPerimeter">Периметр крыши (м)</label>
-                <input type="number" id="drainPerimeter" min="0" step="0.01" placeholder="Например, 40" required />
+                <input type="number" id="drainPerimeter" min="0" step="0.01" placeholder="Например, 40 м" required />
             </div>
             <div class="form-group">
                 <label for="drainHeight">Высота крыши (м)</label>
-                <input type="number" id="drainHeight" min="0" step="0.01" placeholder="Например, 5" required />
+                <input type="number" id="drainHeight" min="0" step="0.01" placeholder="Например, 5 м" required />
             </div>
             <div class="form-group">
                 <label for="drainGutterCost">Стоимость желоба (руб/пог.м)</label>
@@ -275,6 +285,11 @@
             <div class="form-group">
                 <label for="drainPipeInstallCost">Стоимость монтажа трубы (руб/шт)</label>
                 <input type="number" id="drainPipeInstallCost" min="0" step="0.01" placeholder="руб/шт" value="800" required />
+            </div>
+            <!-- Поле для указания маржи -->
+            <div class="form-group">
+                <label for="drainMargin">Маржа (%)</label>
+                <input type="number" id="drainMargin" min="0" step="0.1" placeholder="Например, 10" />
             </div>
             <h4>Дополнительные работы и материалы</h4>
             <p>При необходимости укажите дополнительные статьи сметы.</p>
@@ -345,6 +360,10 @@ function calculatePavement() {
         optionalTotal += unitCost * qty;
     });
     const totalCost = materialCostTotal + laborCostTotal + optionalTotal;
+    // Учитываем маржу
+    const margin = parseFloat(document.getElementById('pavementMargin').value) || 0;
+    const marginAmount = totalCost * margin / 100;
+    const totalWithMargin = totalCost + marginAmount;
     const resultDiv = document.getElementById('pavementResult');
     resultDiv.innerHTML = '';
     resultDiv.style.display = 'block';
@@ -354,7 +373,11 @@ function calculatePavement() {
     resultDiv.innerHTML += '<p>Стоимость бетона: ' + materialCostTotal.toFixed(2) + ' руб.</p>';
     resultDiv.innerHTML += '<p>Стоимость работ: ' + laborCostTotal.toFixed(2) + ' руб.</p>';
     resultDiv.innerHTML += '<p>Стоимость дополнительных работ/материалов: ' + optionalTotal.toFixed(2) + ' руб.</p>';
-    resultDiv.innerHTML += '<p><strong>Общая стоимость: ' + totalCost.toFixed(2) + ' руб.</strong></p>';
+    resultDiv.innerHTML += '<p><strong>Общая стоимость (без маржи): ' + totalCost.toFixed(2) + ' руб.</strong></p>';
+    if (margin > 0) {
+        resultDiv.innerHTML += '<p>Маржа (' + margin.toFixed(2) + '%): ' + marginAmount.toFixed(2) + ' руб.</p>';
+        resultDiv.innerHTML += '<p><strong>Общая стоимость с маржей: ' + totalWithMargin.toFixed(2) + ' руб.</strong></p>';
+    }
     document.getElementById('pavementCopy').style.display = 'inline-block';
 }
 
@@ -382,6 +405,10 @@ function calculateSnow() {
         optionalTotal += unitCost * qty;
     });
     const totalCost = materialCostTotal + laborCostTotal + optionalTotal;
+    // Учитываем маржу
+    const margin = parseFloat(document.getElementById('snowMargin').value) || 0;
+    const marginAmount = totalCost * margin / 100;
+    const totalWithMargin = totalCost + marginAmount;
     const resultDiv = document.getElementById('snowResult');
     resultDiv.innerHTML = '';
     resultDiv.style.display = 'block';
@@ -392,7 +419,11 @@ function calculateSnow() {
     resultDiv.innerHTML += '<p>Стоимость секций: ' + materialCostTotal.toFixed(2) + ' руб.</p>';
     resultDiv.innerHTML += '<p>Стоимость монтажа: ' + laborCostTotal.toFixed(2) + ' руб.</p>';
     resultDiv.innerHTML += '<p>Стоимость дополнительных работ/материалов: ' + optionalTotal.toFixed(2) + ' руб.</p>';
-    resultDiv.innerHTML += '<p><strong>Общая стоимость: ' + totalCost.toFixed(2) + ' руб.</strong></p>';
+    resultDiv.innerHTML += '<p><strong>Общая стоимость (без маржи): ' + totalCost.toFixed(2) + ' руб.</strong></p>';
+    if (margin > 0) {
+        resultDiv.innerHTML += '<p>Маржа (' + margin.toFixed(2) + '%): ' + marginAmount.toFixed(2) + ' руб.</p>';
+        resultDiv.innerHTML += '<p><strong>Общая стоимость с маржей: ' + totalWithMargin.toFixed(2) + ' руб.</strong></p>';
+    }
     document.getElementById('snowCopy').style.display = 'inline-block';
 }
 
@@ -422,6 +453,10 @@ function calculateDrainage() {
         optionalTotal += unitCost * qty;
     });
     const totalCost = gutterMaterialCost + gutterLaborCost + pipeMaterialCostTotal + pipeLaborCostTotal + optionalTotal;
+    // Учитываем маржу
+    const margin = parseFloat(document.getElementById('drainMargin').value) || 0;
+    const marginAmount = totalCost * margin / 100;
+    const totalWithMargin = totalCost + marginAmount;
     const resultDiv = document.getElementById('drainResult');
     resultDiv.innerHTML = '';
     resultDiv.style.display = 'block';
@@ -434,7 +469,11 @@ function calculateDrainage() {
     resultDiv.innerHTML += '<p>Стоимость труб: ' + pipeMaterialCostTotal.toFixed(2) + ' руб.</p>';
     resultDiv.innerHTML += '<p>Стоимость монтажа труб: ' + pipeLaborCostTotal.toFixed(2) + ' руб.</p>';
     resultDiv.innerHTML += '<p>Стоимость дополнительных работ/материалов: ' + optionalTotal.toFixed(2) + ' руб.</p>';
-    resultDiv.innerHTML += '<p><strong>Общая стоимость: ' + totalCost.toFixed(2) + ' руб.</strong></p>';
+    resultDiv.innerHTML += '<p><strong>Общая стоимость (без маржи): ' + totalCost.toFixed(2) + ' руб.</strong></p>';
+    if (margin > 0) {
+        resultDiv.innerHTML += '<p>Маржа (' + margin.toFixed(2) + '%): ' + marginAmount.toFixed(2) + ' руб.</p>';
+        resultDiv.innerHTML += '<p><strong>Общая стоимость с маржей: ' + totalWithMargin.toFixed(2) + ' руб.</strong></p>';
+    }
     document.getElementById('drainCopy').style.display = 'inline-block';
 }
 
@@ -452,9 +491,7 @@ function copyResult(resultId) {
 
 // Инициализация: добавляем примерные элементы для отмостки и устанавливаем стартовую вкладку
 window.onload = function() {
-    // Примеры для отмостки (можно удалить или оставить пустыми)
-    addOptionalItem('pavementOptionalItems', 'Демонтаж старого покрытия', 200, 0);
-    addOptionalItem('pavementOptionalItems', 'Пеноплекс (утеплитель)', 150, 0);
+    // Для отмостки по умолчанию не добавляем дополнительные позиции
     // Выводим вкладку отмостки по умолчанию
     showTab('pavement');
 };
