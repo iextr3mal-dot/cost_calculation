@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор сметы на монтаж отмостки</title>
+<!-- Подключаем Bootstrap Icons для значка крестика -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<style>
+    :root {
+        --primary: #F29C33; /* основной оранжевый цвет из логотипа */
+        --secondary: #0A4D5A; /* тёмный сине-зелёный цвет */
+        --light: #FFF5E5; /* светлый фон */
+        --danger: #C04D4F; /* красный для кнопки удаления */
+    }
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: var(--light);
+        color: var(--secondary);
+    }
+    header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background-color: var(--primary);
+        color: var(--secondary);
+        padding: 15px;
+    }
+    /* Скрыть любые изображения в заголовке */
+    header img {
+        display: none;
+    }
+    .logo {
+        /* Логотип скрыт по просьбе пользователя */
+        height: 60px;
+        width: auto;
+        border-radius: 0;
+        object-fit: contain;
+        display: none;
+    }
+    header h1 {
+        margin: 0;
+        font-size: 24px;
+    }
+    main {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    input, select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    button {
+        background-color: var(--secondary);
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.2s;
+    }
+    button:hover {
+        background-color: #0C6174;
+    }
+    .result {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid var(--secondary);
+        border-radius: 4px;
+        background-color: var(--light);
+    }
+
+    /* Стили для вкладок */
+    .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .tab-btn {
+        background-color: var(--light);
+        color: var(--secondary);
+        border: 1px solid var(--secondary);
+        border-radius: 4px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+    }
+    .tab-btn.active, .tab-btn:hover {
+        background-color: var(--secondary);
+        color: var(--light);
+    }
+    .tab-content {
+        display: none;
+    }
+
+    /* Стили для дополнительных элементов */
+    .optional-item {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+        align-items: center;
+    }
+    .optional-item input[type="text"], .optional-item input[type="number"] {
+        flex: 1 1 30%;
+        min-width: 90px;
+        padding: 6px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    .optional-item .remove-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: transparent;
+        color: var(--secondary);
+        border: 1px solid var(--secondary);
+        border-radius: 4px;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        cursor: pointer;
+        font-size: 18px;
+        transition: background-color 0.2s, color 0.2s;
+    }
+    .optional-item .remove-btn:hover {
+        background-color: var(--secondary);
+        color: var(--light);
+    }
+
+    /* Адаптация для мобильных устройств */
+    @media (max-width: 600px) {
+        body {
+            font-size: 14px;
+        }
+        header h1 {
+            font-size: 20px;
+        }
+        main {
+            margin: 10px;
+            padding: 15px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+        }
+    }
+</style>
+</head>
+<body>
+<header>
+    <!-- Встраиваем логотип через data URI, чтобы не требовалось отдельного файла -->
+    <img src="data:image/png;base64,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" alt="Логотип" class="logo" />
+<h1>Калькулятор строительных работ</h1>
+</header>
+<main>
+    <!-- Навигация между разделами -->
+    <div class="tabs">
+        <button type="button" class="tab-btn active" id="pavementTabBtn" onclick="showTab('pavement')">Отмостка</button>
+        <button type="button" class="tab-btn" id="snowTabBtn" onclick="showTab('snow')">Снегозадержатели</button>
+        <button type="button" class="tab-btn" id="drainTabBtn" onclick="showTab('drainage')">Водосточная система</button>
+    </div>
+    <!-- Раздел расчёта отмостки (бетон по умолчанию) -->
+    <div id="pavement" class="tab-content" style="display:block;">
+        <form id="pavementForm" onsubmit="event.preventDefault(); calculatePavement();">
+            <h3>Расчёт отмостки</h3>
+            <div class="form-group">
+                <label for="pavementLength">Длина отмостки (м)</label>
+                <input type="number" id="pavementLength" min="0" step="0.01" placeholder="Например, 30" required />
+            </div>
+            <div class="form-group">
+                <label for="pavementWidth">Ширина отмостки (м)</label>
+                <input type="number" id="pavementWidth" min="0" step="0.01" placeholder="Например, 1.0" required />
+            </div>
+            <div class="form-group">
+                <label for="pavementThickness">Толщина бетона (см)</label>
+                <input type="number" id="pavementThickness" min="0" step="0.1" placeholder="Например, 10" required />
+            </div>
+            <div class="form-group">
+                <label for="pavementMaterialCost">Стоимость бетона (руб/куб.м)</label>
+                <input type="number" id="pavementMaterialCost" min="0" step="0.01" placeholder="руб/куб.м" value="3000" required />
+            </div>
+            <div class="form-group">
+                <label for="pavementLaborCost">Стоимость работ (руб/кв.м)</label>
+                <input type="number" id="pavementLaborCost" min="0" step="0.01" placeholder="руб/кв.м" value="500" required />
+            </div>
+            <h4>Дополнительные работы и материалы</h4>
+            <p>При необходимости укажите дополнительные статьи сметы. Можно добавить несколько позиций.</p>
+            <div id="pavementOptionalItems"></div>
+            <button type="button" onclick="addOptionalItem('pavementOptionalItems')" style="margin-top: 10px;">+ Добавить элемент</button>
+            <button type="submit" style="margin-top: 10px;">Рассчитать смету</button>
+        </form>
+        <div id="pavementResult" class="result" style="display:none;"></div>
+        <button type="button" id="pavementCopy" onclick="copyResult('pavementResult')" style="display:none; margin-top: 10px;">Скопировать результат</button>
+    </div>
+    <!-- Раздел расчёта снегозадержателей -->
+    <div id="snow" class="tab-content" style="display:none;">
+        <form id="snowForm" onsubmit="event.preventDefault(); calculateSnow();">
+            <h3>Расчёт снегозадержателей</h3>
+            <div class="form-group">
+                <label for="snowLength">Длина ската (м)</label>
+                <input type="number" id="snowLength" min="0" step="0.01" placeholder="Например, 10" required />
+            </div>
+            <div class="form-group">
+                <label for="snowAngle">Угол наклона крыши (°)</label>
+                <input type="number" id="snowAngle" min="0" step="0.1" placeholder="Например, 30" required />
+            </div>
+            <div class="form-group">
+                <label for="snowSectionLength">Длина одной секции (м)</label>
+                <input type="number" id="snowSectionLength" min="0.1" step="0.1" placeholder="Например, 3" value="3" required />
+            </div>
+            <div class="form-group">
+                <label for="snowSectionCost">Стоимость секции (руб/шт)</label>
+                <input type="number" id="snowSectionCost" min="0" step="0.01" placeholder="руб/шт" value="500" required />
+            </div>
+            <div class="form-group">
+                <label for="snowInstallCost">Стоимость монтажа секции (руб/шт)</label>
+                <input type="number" id="snowInstallCost" min="0" step="0.01" placeholder="руб/шт" value="200" required />
+            </div>
+            <h4>Дополнительные работы и материалы</h4>
+            <p>При необходимости укажите дополнительные статьи сметы.</p>
+            <div id="snowOptionalItems"></div>
+            <button type="button" onclick="addOptionalItem('snowOptionalItems')" style="margin-top: 10px;">+ Добавить элемент</button>
+            <button type="submit" style="margin-top: 10px;">Рассчитать смету</button>
+        </form>
+        <div id="snowResult" class="result" style="display:none;"></div>
+        <button type="button" id="snowCopy" onclick="copyResult('snowResult')" style="display:none; margin-top: 10px;">Скопировать результат</button>
+    </div>
+    <!-- Раздел расчёта водосточной системы -->
+    <div id="drainage" class="tab-content" style="display:none;">
+        <form id="drainForm" onsubmit="event.preventDefault(); calculateDrainage();">
+            <h3>Расчёт водосточной системы</h3>
+            <div class="form-group">
+                <label for="drainPerimeter">Периметр крыши (м)</label>
+                <input type="number" id="drainPerimeter" min="0" step="0.01" placeholder="Например, 40" required />
+            </div>
+            <div class="form-group">
+                <label for="drainHeight">Высота крыши (м)</label>
+                <input type="number" id="drainHeight" min="0" step="0.01" placeholder="Например, 5" required />
+            </div>
+            <div class="form-group">
+                <label for="drainGutterCost">Стоимость желоба (руб/пог.м)</label>
+                <input type="number" id="drainGutterCost" min="0" step="0.01" placeholder="руб/м" value="300" required />
+            </div>
+            <div class="form-group">
+                <label for="drainGutterInstallCost">Стоимость монтажа желоба (руб/пог.м)</label>
+                <input type="number" id="drainGutterInstallCost" min="0" step="0.01" placeholder="руб/м" value="150" required />
+            </div>
+            <div class="form-group">
+                <label for="drainPipeCost">Стоимость водосточной трубы (руб/пог.м)</label>
+                <input type="number" id="drainPipeCost" min="0" step="0.01" placeholder="руб/м" value="400" required />
+            </div>
+            <div class="form-group">
+                <label for="drainPipeInstallCost">Стоимость монтажа трубы (руб/шт)</label>
+                <input type="number" id="drainPipeInstallCost" min="0" step="0.01" placeholder="руб/шт" value="800" required />
+            </div>
+            <h4>Дополнительные работы и материалы</h4>
+            <p>При необходимости укажите дополнительные статьи сметы.</p>
+            <div id="drainOptionalItems"></div>
+            <button type="button" onclick="addOptionalItem('drainOptionalItems')" style="margin-top: 10px;">+ Добавить элемент</button>
+            <button type="submit" style="margin-top: 10px;">Рассчитать смету</button>
+        </form>
+        <div id="drainResult" class="result" style="display:none;"></div>
+        <button type="button" id="drainCopy" onclick="copyResult('drainResult')" style="display:none; margin-top: 10px;">Скопировать результат</button>
+    </div>
+</main>
+
+<script>
+// Показ нужной вкладки и скрытие остальных
+function showTab(tabId) {
+    const tabs = document.querySelectorAll('.tab-content');
+    tabs.forEach(function(tab) {
+        tab.style.display = 'none';
+    });
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(function(btn) {
+        btn.classList.remove('active');
+    });
+    document.getElementById(tabId).style.display = 'block';
+    // Активируем кнопку
+    if (tabId === 'pavement') {
+        document.getElementById('pavementTabBtn').classList.add('active');
+    } else if (tabId === 'snow') {
+        document.getElementById('snowTabBtn').classList.add('active');
+    } else if (tabId === 'drainage') {
+        document.getElementById('drainTabBtn').classList.add('active');
+    }
+}
+
+// Универсальное добавление дополнительных элементов
+function addOptionalItem(containerId, desc = '', unitCost = '', qty = '') {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'optional-item';
+    div.innerHTML =
+        '<input type="text" class="opt-desc" placeholder="Описание" value="' + desc + '" />' +
+        '<input type="number" class="opt-unit-cost" placeholder="Стоимость" step="0.01" min="0" value="' + unitCost + '" />' +
+        '<input type="number" class="opt-qty" placeholder="Кол-во" step="0.01" min="0" value="' + qty + '" />' +
+        '<button type="button" class="remove-btn"><i class="bi bi-x"></i></button>';
+    // слушатель для удаления
+    div.querySelector('.remove-btn').addEventListener('click', function() {
+        container.removeChild(div);
+    });
+    container.appendChild(div);
+}
+
+// Расчёт сметы на отмостку (бетон)
+function calculatePavement() {
+    const length = parseFloat(document.getElementById('pavementLength').value);
+    const width = parseFloat(document.getElementById('pavementWidth').value);
+    const thicknessCm = parseFloat(document.getElementById('pavementThickness').value);
+    const materialCost = parseFloat(document.getElementById('pavementMaterialCost').value);
+    const laborCost = parseFloat(document.getElementById('pavementLaborCost').value);
+    const area = length * width;
+    const volume = area * (thicknessCm / 100);
+    const materialCostTotal = volume * materialCost;
+    const laborCostTotal = area * laborCost;
+    // Дополнительные расходы
+    let optionalTotal = 0;
+    document.querySelectorAll('#pavementOptionalItems .optional-item').forEach(function(item) {
+        const unitCost = parseFloat(item.querySelector('.opt-unit-cost').value) || 0;
+        const qty = parseFloat(item.querySelector('.opt-qty').value) || 0;
+        optionalTotal += unitCost * qty;
+    });
+    const totalCost = materialCostTotal + laborCostTotal + optionalTotal;
+    const resultDiv = document.getElementById('pavementResult');
+    resultDiv.innerHTML = '';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML += '<h4>Результаты расчета отмостки</h4>';
+    resultDiv.innerHTML += '<p>Площадь отмостки: ' + area.toFixed(2) + ' кв.м</p>';
+    resultDiv.innerHTML += '<p>Объем бетона: ' + volume.toFixed(3) + ' куб.м</p>';
+    resultDiv.innerHTML += '<p>Стоимость бетона: ' + materialCostTotal.toFixed(2) + ' руб.</p>';
+    resultDiv.innerHTML += '<p>Стоимость работ: ' + laborCostTotal.toFixed(2) + ' руб.</p>';
+    resultDiv.innerHTML += '<p>Стоимость дополнительных работ/материалов: ' + optionalTotal.toFixed(2) + ' руб.</p>';
+    resultDiv.innerHTML += '<p><strong>Общая стоимость: ' + totalCost.toFixed(2) + ' руб.</strong></p>';
+    document.getElementById('pavementCopy').style.display = 'inline-block';
+}
+
+// Расчёт снегозадержателей
+function calculateSnow() {
+    const length = parseFloat(document.getElementById('snowLength').value);
+    const angle = parseFloat(document.getElementById('snowAngle').value);
+    const sectionLength = parseFloat(document.getElementById('snowSectionLength').value);
+    const sectionCost = parseFloat(document.getElementById('snowSectionCost').value);
+    const installCost = parseFloat(document.getElementById('snowInstallCost').value);
+    // определяем количество рядов в зависимости от угла: до 40° - 1 ряд; свыше 40° - 2 ряда
+    let rows = 1;
+    if (angle > 40) {
+        rows = 2;
+    }
+    const sectionsPerRow = Math.ceil(length / sectionLength);
+    const totalSections = sectionsPerRow * rows;
+    const materialCostTotal = totalSections * sectionCost;
+    const laborCostTotal = totalSections * installCost;
+    // Дополнительные расходы
+    let optionalTotal = 0;
+    document.querySelectorAll('#snowOptionalItems .optional-item').forEach(function(item) {
+        const unitCost = parseFloat(item.querySelector('.opt-unit-cost').value) || 0;
+        const qty = parseFloat(item.querySelector('.opt-qty').value) || 0;
+        optionalTotal += unitCost * qty;
+    });
+    const totalCost = materialCostTotal + laborCostTotal + optionalTotal;
+    const resultDiv = document.getElementById('snowResult');
+    resultDiv.innerHTML = '';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML += '<h4>Результаты расчета снегозадержателей</h4>';
+    resultDiv.innerHTML += '<p>Количество рядов: ' + rows + '</p>';
+    resultDiv.innerHTML += '<p>Секций на ряд: ' + sectionsPerRow + '</p>';
+    resultDiv.innerHTML += '<p>Общее число секций: ' + totalSections + '</p>';
+    resultDiv.innerHTML += '<p>Стоимость секций: ' + materialCostTotal.toFixed(2) + ' руб.</p>';
+    resultDiv.innerHTML += '<p>Стоимость монтажа: ' + laborCostTotal.toFixed(2) + ' руб.</p>';
+    resultDiv.innerHTML += '<p>Стоимость дополнительных работ/материалов: ' + optionalTotal.toFixed(2) + ' руб.</p>';
+    resultDiv.innerHTML += '<p><strong>Общая стоимость: ' + totalCost.toFixed(2) + ' руб.</strong></p>';
+    document.getElementById('snowCopy').style.display = 'inline-block';
+}
+
+// Расчёт водосточной системы
+function calculateDrainage() {
+    const perimeter = parseFloat(document.getElementById('drainPerimeter').value);
+    const height = parseFloat(document.getElementById('drainHeight').value);
+    const gutterCost = parseFloat(document.getElementById('drainGutterCost').value);
+    const gutterInstallCost = parseFloat(document.getElementById('drainGutterInstallCost').value);
+    const pipeCost = parseFloat(document.getElementById('drainPipeCost').value);
+    const pipeInstallCost = parseFloat(document.getElementById('drainPipeInstallCost').value);
+    // Количество секций желобов (3 м) и общая длина
+    const gutterSections = Math.ceil(perimeter / 3);
+    const gutterLength = perimeter; // считаем, что желоб проходит по всему периметру
+    const gutterMaterialCost = gutterLength * gutterCost;
+    const gutterLaborCost = gutterLength * gutterInstallCost;
+    // Количество водосточных труб (одна на каждые 10 м периметра)
+    const downpipes = Math.ceil(perimeter / 10);
+    const pipeLengthTotal = downpipes * height;
+    const pipeMaterialCostTotal = pipeLengthTotal * pipeCost;
+    const pipeLaborCostTotal = downpipes * pipeInstallCost;
+    // Дополнительные расходы
+    let optionalTotal = 0;
+    document.querySelectorAll('#drainOptionalItems .optional-item').forEach(function(item) {
+        const unitCost = parseFloat(item.querySelector('.opt-unit-cost').value) || 0;
+        const qty = parseFloat(item.querySelector('.opt-qty').value) || 0;
+        optionalTotal += unitCost * qty;
+    });
+    const totalCost = gutterMaterialCost + gutterLaborCost + pipeMaterialCostTotal + pipeLaborCostTotal + optionalTotal;
+    const resultDiv = document.getElementById('drainResult');
+    resultDiv.innerHTML = '';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML += '<h4>Результаты расчета водосточной системы</h4>';
+    resultDiv.innerHTML += '<p>Длина желобов: ' + gutterLength.toFixed(2) + ' м (секций: ' + gutterSections + ')</p>';
+    resultDiv.innerHTML += '<p>Стоимость желобов: ' + gutterMaterialCost.toFixed(2) + ' руб.</p>';
+    resultDiv.innerHTML += '<p>Стоимость монтажа желобов: ' + gutterLaborCost.toFixed(2) + ' руб.</p>';
+    resultDiv.innerHTML += '<p>Количество труб: ' + downpipes + '</p>';
+    resultDiv.innerHTML += '<p>Общая длина труб: ' + pipeLengthTotal.toFixed(2) + ' м</p>';
+    resultDiv.innerHTML += '<p>Стоимость труб: ' + pipeMaterialCostTotal.toFixed(2) + ' руб.</p>';
+    resultDiv.innerHTML += '<p>Стоимость монтажа труб: ' + pipeLaborCostTotal.toFixed(2) + ' руб.</p>';
+    resultDiv.innerHTML += '<p>Стоимость дополнительных работ/материалов: ' + optionalTotal.toFixed(2) + ' руб.</p>';
+    resultDiv.innerHTML += '<p><strong>Общая стоимость: ' + totalCost.toFixed(2) + ' руб.</strong></p>';
+    document.getElementById('drainCopy').style.display = 'inline-block';
+}
+
+// Копирование результата
+function copyResult(resultId) {
+    const div = document.getElementById(resultId);
+    const text = div.innerText || div.textContent;
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(function() {
+        alert('Результат скопирован в буфер обмена');
+    }, function(err) {
+        alert('Не удалось скопировать: ' + err);
+    });
+}
+
+// Инициализация: добавляем примерные элементы для отмостки и устанавливаем стартовую вкладку
+window.onload = function() {
+    // Примеры для отмостки (можно удалить или оставить пустыми)
+    addOptionalItem('pavementOptionalItems', 'Демонтаж старого покрытия', 200, 0);
+    addOptionalItem('pavementOptionalItems', 'Пеноплекс (утеплитель)', 150, 0);
+    // Выводим вкладку отмостки по умолчанию
+    showTab('pavement');
+};
+</script>
+</body>
+</html>
