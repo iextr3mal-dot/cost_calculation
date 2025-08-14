@@ -62,12 +62,88 @@
         margin-bottom: 5px;
         font-weight: bold;
     }
+
+    /*
+     * Стили для меток с чекбоксами.  По умолчанию все label в форме –
+     * блочные элементы, поэтому чекбоксы с подписью располагались
+     * вертикально и казалось, что флажок «уплывает» вправо.  Класс
+     * ``checkbox-label`` делает label flex‑контейнером, выравнивает
+     * содержимое по центру и добавляет небольшой отступ между
+     * чекбоксом и текстом, чтобы они стояли в одной линии.
+     */
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: bold;
+        /* сохраняем блоковую модель у родителя .form-group */
+    }
+
+    /*
+     * Стили для переключателей (toggle switches), которые заменяют обычные
+     * чекбоксы для опций "Дождеприемник" и "Утепление отмостки".  Переключатель
+     * состоит из скрытого checkbox и псевдоэлемента, имитирующего ползунок.
+     */
+    .switch {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+    .switch input[type="checkbox"] {
+        /* скрываем стандартный вид чекбокса */
+        appearance: none;
+        -webkit-appearance: none;
+        width: 40px;
+        height: 20px;
+        background-color: #ccc;
+        border-radius: 20px;
+        position: relative;
+        outline: none;
+        transition: background-color 0.2s;
+        margin: 0; /* отменяем глобальные отступы для чекбоксов */
+    }
+    .switch input[type="checkbox"]::after {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        top: 1px;
+        left: 1px;
+        transition: transform 0.2s;
+    }
+    .switch input[type="checkbox"]:checked {
+        background-color: var(--secondary);
+    }
+    .switch input[type="checkbox"]:checked::after {
+        transform: translateX(20px);
+    }
+    .switch span {
+        font-weight: bold;
+    }
     input, select {
         width: 100%;
         padding: 8px;
         border: 1px solid #ccc;
         border-radius: 4px;
         box-sizing: border-box;
+    }
+
+    /* Сбрасываем ширину и отступы для чекбоксов, чтобы они не занимали
+       всю ширину родительского контейнера. По умолчанию базовое
+       правило для input делает все элементы шириной 100%, что
+       приводит к «уплыванию» чекбокса вправо. */
+    input[type="checkbox"] {
+        width: auto;
+        padding: 0;
+        margin-right: 6px;
+        margin-left: 0;
+        /* убираем рамки и скругление, чтобы сохранить стандартный вид */
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
     }
     button {
         background-color: var(--secondary);
@@ -206,7 +282,65 @@
                 <label for="pavementLaborCost">Стоимость работ (руб/кв.м)</label>
                 <input type="number" id="pavementLaborCost" min="0" step="0.01" placeholder="руб/кв.м" value="500" required />
             </div>
-            <!-- Поле для указания маржи -->
+            <!-- Чекбокс для дождеприемника (теперь оформлен как переключатель) -->
+            <div class="form-group">
+                <!--
+                    Переключатель отображается в виде слайдера.  Внутри label
+                    используется класс ``switch``, который стилизован в CSS.  Этот
+                    контейнер содержит сам input и текст подписи.
+                -->
+                <label class="switch">
+                    <input type="checkbox" id="pavementDrainCheckbox" onclick="togglePavementDrain()" />
+                    <span>Дождеприемник</span>
+                </label>
+            </div>
+            <div id="pavementDrainFields" style="display:none; margin-left: 20px;">
+                <!-- Сначала идут поля по дождеприемникам: количество и стоимость -->
+                <div class="form-group">
+                    <label for="pavementDrainCount">Количество дождеприемников (шт)</label>
+                    <input type="number" id="pavementDrainCount" min="0" step="1" placeholder="Например, 1" />
+                </div>
+                <div class="form-group">
+                    <label for="pavementDrainUnitCost">Стоимость дождеприемника (руб/шт)</label>
+                    <input type="number" id="pavementDrainUnitCost" min="0" step="0.01" placeholder="руб/шт" />
+                </div>
+                <!-- Затем идут поля для канализационной трубы: длина и стоимость монтажа -->
+                <div class="form-group">
+                    <label for="pavementDrainLength">Монтаж канализационной трубы (м)</label>
+                    <input type="number" id="pavementDrainLength" min="0" step="0.01" placeholder="Например, 5 м" />
+                </div>
+                <div class="form-group">
+                    <label for="pavementDrainCost">Стоимость монтажа трубы (руб/м)</label>
+                    <input type="number" id="pavementDrainCost" min="0" step="0.01" placeholder="руб/м" />
+                </div>
+            </div>
+            <!-- Чекбокс для утепления отмостки (также оформлен как переключатель) -->
+            <div class="form-group">
+                <label class="switch">
+                    <input type="checkbox" id="pavementInsulationCheckbox" onclick="togglePavementInsulation()" />
+                    <span>Утепление отмостки</span>
+                </label>
+            </div>
+            <div id="pavementInsulationFields" style="display:none; margin-left: 20px;">
+                <div class="form-group">
+                    <label for="pavementInsulationFundLength">Утепление фундамента (м.п)</label>
+                    <input type="number" id="pavementInsulationFundLength" min="0" step="0.01" placeholder="Например, 30 м" />
+                </div>
+                <div class="form-group">
+                    <label for="pavementInsulationFundCost">Стоимость утепления фундамента (руб/м.п)</label>
+                    <input type="number" id="pavementInsulationFundCost" min="0" step="0.01" placeholder="руб/м" />
+                </div>
+                <div class="form-group">
+                    <label for="pavementInsulationArea">Утепление отмостки (кв.м)</label>
+                    <input type="number" id="pavementInsulationArea" min="0" step="0.01" placeholder="Например, 15 кв.м" />
+                </div>
+                <div class="form-group">
+                    <label for="pavementInsulationAreaCost">Стоимость утепления отмостки (руб/кв.м)</label>
+                    <input type="number" id="pavementInsulationAreaCost" min="0" step="0.01" placeholder="руб/кв.м" />
+                </div>
+            </div>
+            <!-- Поле для указания маржи (перемещено под дождеприемники и утепление)
+                 Отступ убран для выравнивания с основными полями -->
             <div class="form-group">
                 <label for="pavementMargin">Маржа (%)</label>
                 <input type="number" id="pavementMargin" min="0" step="0.1" placeholder="Например, 10" />
@@ -324,6 +458,24 @@ function showTab(tabId) {
     }
 }
 
+// Переключение полей для дождеприемника в отмостке
+function togglePavementDrain() {
+    const checked = document.getElementById('pavementDrainCheckbox').checked;
+    const fields = document.getElementById('pavementDrainFields');
+    if (fields) {
+        fields.style.display = checked ? 'block' : 'none';
+    }
+}
+
+// Переключение полей для утепления отмостки
+function togglePavementInsulation() {
+    const checked = document.getElementById('pavementInsulationCheckbox').checked;
+    const fields = document.getElementById('pavementInsulationFields');
+    if (fields) {
+        fields.style.display = checked ? 'block' : 'none';
+    }
+}
+
 // Универсальное добавление дополнительных элементов
 function addOptionalItem(containerId, desc = '', unitCost = '', qty = '') {
     const container = document.getElementById(containerId);
@@ -359,7 +511,29 @@ function calculatePavement() {
         const qty = parseFloat(item.querySelector('.opt-qty').value) || 0;
         optionalTotal += unitCost * qty;
     });
-    const totalCost = materialCostTotal + laborCostTotal + optionalTotal;
+    // Стоимость дождеприемника и утепления
+    // Стоимость дождеприемника (канализационной трубы и самих приёмников)
+    let drainPipeCost = 0;
+    let drainReceiversCost = 0;
+    let drainCost = 0;
+    if (document.getElementById('pavementDrainCheckbox') && document.getElementById('pavementDrainCheckbox').checked) {
+        const drainLength = parseFloat(document.getElementById('pavementDrainLength').value) || 0;
+        const drainCostPer = parseFloat(document.getElementById('pavementDrainCost').value) || 0;
+        drainPipeCost = drainLength * drainCostPer;
+        const drainCount = parseFloat(document.getElementById('pavementDrainCount').value) || 0;
+        const drainUnitCost = parseFloat(document.getElementById('pavementDrainUnitCost').value) || 0;
+        drainReceiversCost = drainCount * drainUnitCost;
+        drainCost = drainPipeCost + drainReceiversCost;
+    }
+    let insulationCost = 0;
+    if (document.getElementById('pavementInsulationCheckbox') && document.getElementById('pavementInsulationCheckbox').checked) {
+        const fundLength = parseFloat(document.getElementById('pavementInsulationFundLength').value) || 0;
+        const fundCost = parseFloat(document.getElementById('pavementInsulationFundCost').value) || 0;
+        const insArea = parseFloat(document.getElementById('pavementInsulationArea').value) || 0;
+        const areaCost = parseFloat(document.getElementById('pavementInsulationAreaCost').value) || 0;
+        insulationCost = fundLength * fundCost + insArea * areaCost;
+    }
+    const totalCost = materialCostTotal + laborCostTotal + optionalTotal + drainCost + insulationCost;
     // Учитываем маржу
     const margin = parseFloat(document.getElementById('pavementMargin').value) || 0;
     const marginAmount = totalCost * margin / 100;
@@ -373,6 +547,17 @@ function calculatePavement() {
     resultDiv.innerHTML += '<p>Стоимость бетона: ' + materialCostTotal.toFixed(2) + ' руб.</p>';
     resultDiv.innerHTML += '<p>Стоимость работ: ' + laborCostTotal.toFixed(2) + ' руб.</p>';
     resultDiv.innerHTML += '<p>Стоимость дополнительных работ/материалов: ' + optionalTotal.toFixed(2) + ' руб.</p>';
+    if (drainPipeCost > 0 || drainReceiversCost > 0) {
+        if (drainPipeCost > 0) {
+            resultDiv.innerHTML += '<p>Стоимость монтажа канализационной трубы: ' + drainPipeCost.toFixed(2) + ' руб.</p>';
+        }
+        if (drainReceiversCost > 0) {
+            resultDiv.innerHTML += '<p>Стоимость дождеприемников: ' + drainReceiversCost.toFixed(2) + ' руб.</p>';
+        }
+    }
+    if (insulationCost > 0) {
+        resultDiv.innerHTML += '<p>Стоимость утепления: ' + insulationCost.toFixed(2) + ' руб.</p>';
+    }
     resultDiv.innerHTML += '<p><strong>Общая стоимость (без маржи): ' + totalCost.toFixed(2) + ' руб.</strong></p>';
     if (margin > 0) {
         resultDiv.innerHTML += '<p>Маржа (' + margin.toFixed(2) + '%): ' + marginAmount.toFixed(2) + ' руб.</p>';
